@@ -1,13 +1,17 @@
 {
-    "name": "mcs/amazon-mws",
-    "description": "Library to interface with Amazon MWS",
+    "name": "rhi/amazon-mws",
+    "description": "Library to interface with Amazon MWS, forked from mcs/amazon-mws",
     "license": "MIT",
-    "keywords": ["amazon", "mws"],
+    "keywords": ["mws", "amazon"],
     "minimum-stability": "dev",
     "authors": [
         {
             "name": "Michiel Meertens",
             "email": "meertensmichiel28@gmail.com"
+        },
+        {
+            "name": "Jimmy Lai",
+            "email": "jimmy810348@gmail.com"
         }
     ],
     "require": {

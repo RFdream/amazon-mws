@@ -145,7 +145,32 @@ class MWSEndPoint{
             'action' => 'GetLowestPricedOffersForASIN',
             'path' => '/Products/2011-10-01',
             'date' => '2011-10-01'
+        ],
+        'ListInboundShipments' => [
+            'method' => 'POST',
+            'action' => 'ListInboundShipments',
+            'path' => '/FulfillmentInboundShipment/2010-10-01',
+            'date' => '2010-10-01'
+        ],
+        'ListInboundShipmentsByNextToken' => [
+            'method' => 'POST',
+            'action' => 'ListInboundShipmentsByNextToken',
+            'path' => '/FulfillmentInboundShipment/2010-10-01',
+            'date' => '2010-10-01'
+        ],
+        'ListInboundShipmentItems' => [
+            'method' => 'POST',
+            'action' => 'ListInboundShipmentItems',
+            'path' => '/FulfillmentInboundShipment/2010-10-01',
+            'date' => '2010-10-01'
+        ],
+        'ListInboundShipmentItemsByNextToken' => [
+            'method' => 'POST',
+            'action' => 'ListInboundShipmentItemsByNextToken',
+            'path' => '/FulfillmentInboundShipment/2010-10-01',
+            'date' => '2010-10-01'
         ]
+
     ];
 
     public static function get($key)

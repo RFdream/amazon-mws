@@ -41,7 +41,7 @@ class MWSClient{
         'A1VC38T7YXB528' => 'mws.amazonservices.jp',
         'AAHKV2X7AFYLW' => 'mws.amazonservices.com.cn',
         'A39IBJ37TRP1C6' => 'mws.amazonservices.com.au',
-	'A2Q3Y263D00KWC' => 'mws.amazonservices.com'
+	    'A2Q3Y263D00KWC' => 'mws.amazonservices.com'
     ];
 
     protected $debugNextFeed = false;
@@ -1170,6 +1170,112 @@ class MWSClient{
 	    }
 	    
 	    return $result;
+    }
+
+    /**
+     * Request MWS For ListInboundShipments
+     */
+    public function ListInboundShipments(string $status, string $id = null)
+    {
+        $ShipmentId = [];
+        $response = $this->request(
+            'ListInboundShipments',
+            [
+                'ShipmentStatusList.member.1' => $status,
+                'ShipmentIdList.member.1' => $id
+            ]
+        );
+        if (isset($response['ListInboundShipmentsResult']['ShipmentData']['member'])){
+            foreach($response['ListInboundShipmentsResult']['ShipmentData']['member'] as $shipment) {
+                array_push($ShipmentId, $shipment['ShipmentId']);
+            }
+        }
+        $response = $this->ListInboundShipmentsByNextToken($response['ListInboundShipmentsResult']['NextToken']);
+        if (empty($response)) return $ShipmentId;
+    
+        return $response;
+    }
+
+    /**
+     * Request MWS For ListInboundShipmentsByNextToken 
+     */
+    public function ListInboundShipmentsByNextToken(string $token)
+    {
+        $result = [];
+        $response = $this->request(
+            'ListInboundShipmentsByNextToken',
+            [
+                'NextToken' => $token
+            ]
+        );
+        if (empty($response['ListInboundShipmentsByNextTokenResult']['ShipmentData'])) {
+            return [];
+        }
+        if (isset($response['ListInboundShipmentsByNextTokenResult']['ShipmentData']['member'])) {
+            foreach($response['ListInboundShipmentsByNextTokenResult']['ShipmentData']['member'] as $member) {
+                array_push($result, $member['ShipmentId']); 
+            }
+        }
+        if (isset($response['ListInboundShipmentsByNextTokenResult']['NextToken'])) {
+            $response = $this->ListInboundShipmentsByNextToken($response['ListInboundShipmentsByNextTokenResult']['NextToken']);
+            $result = array_merge($result, $response);
+        }
+        return $result;
+    }
+
+    /**
+     * Request MWS For ListInboundShipmentItems
+     */
+    public function ListInboundShipmentItems(string $ShipmentId)
+    {
+        $result = [];
+        $response = $this->request('ListInboundShipmentItems', [
+            'ShipmentId' => $ShipmentId
+        ]);
+        if (isset($response['ListInboundShipmentItemsResult']['ItemData']['member'])) {
+            if (isset($response['ListInboundShipmentItemsResult']['ItemData']['member']['SellerSKU'])) {
+                $result[$response['ListInboundShipmentItemsResult']['ItemData']['member']['SellerSKU']] = $response['ListInboundShipmentItemsResult']['ItemData']['member']['QuantityShipped'];
+            }
+            else {
+                foreach($response['ListInboundShipmentItemsResult']['ItemData']['member'] as $shipment) {
+                    $result[$shipment['SellerSKU']] = $shipment['QuantityShipped'];
+                }
+            }
+        }
+        if (isset($response['ListInboundShipmentItemsResult']['NextToken'])) {
+            $response = $this->ListInboundShipmentItemsByNextToken($response['ListInboundShipmentItemsResult']['NextToken']);
+            $result = array_merge($result, $response);
+        }
+        return $result;
+    }
+
+    /**
+     * Request MWS For ListInboundShipmentItemsByNextToken
+     */
+    public function ListInboundShipmentItemsByNextToken(string $token)
+    {
+        $result = [];
+        $response = $this->request('ListInboundShipmentItemsByNextToken', [
+            'NextToken' => $token
+        ]);
+        if (empty($response['ListInboundShipmentItemsByNextTokenResult']['ItemData'])) {
+            return [];
+        }
+        if (isset($response['ListInboundShipmentItemsByNextTokenResult']['ItemData']['member'])) {
+            foreach($response['ListInboundShipmentItemsByNextTokenResult']['ItemData']['member'] as $shipment) {
+                if (!isset($result[$shipment['SellerSKU']])) {
+                    $result[$shipment['SellerSKU']] = $shipment['QuantityShipped'];
+                }
+                else {
+                    $result[$shipment['SellerSKU']] += $shipment['QuantityShipped'];
+                }
+            }
+        }
+        if (isset($response['ListInboundShipmentItemsByNextTokenResult']['NextToken'])) {
+            $response = $this->ListInboundShipmentItemsByNextToken($response['ListInboundShipmentItemsByNextTokenResult']['NextToken']);
+            $result = array_merge($result, $response);
+        }
+        return $result;
     }
 
     /**
